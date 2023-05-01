@@ -4,76 +4,36 @@
  */
 package gateway;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import datos.DataGenerator;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.OutputStream;
 import java.net.Socket;
 
 /**
  *
  * @author tonyd
  */
-public class Gateway implements Runnable{
-    private int puerto;
-    private BufferedReader in;
-    private BufferedWriter out;
-    private Socket sc;
-    private static Gateway gateway;
+public class Gateway{
+ private String host;
+    private int port;
+    private DataGenerator dataGenerator;
     
-    public Gateway(int puerto){
-        this.puerto = puerto;
+    public Gateway(String host, int port) {
+        this.host = host;
+        this.port = port;
+        this.dataGenerator = new DataGenerator();
     }
     
-    public static Gateway getInstance(){
-        if(gateway == null){
-            gateway = new Gateway(9000);
-        }
-        return gateway;
-    }
-    
-    public void iniciarListener(){
-        new Thread(gateway).start();
-    }
-    
-    @Override
-    public void run() {
-        final String HOST = "127.0.0.1";
-        try{
-            sc = new Socket(HOST, puerto);
-            in = new BufferedReader(new InputStreamReader(sc.getInputStream()));
-            out = new BufferedWriter(new OutputStreamWriter(sc.getOutputStream()));
-            while(true){
-                String mensaje = in.readLine();
-                if(mensaje == null) break;
-                
+    public void sendData() throws IOException, InterruptedException {
+        try (Socket socket = new Socket(host, port)) {
+            OutputStream outputStream = socket.getOutputStream();
+            while (true) {
+                String data = dataGenerator.generateData();
+                outputStream.write(data.getBytes());
+                outputStream.flush();
+                Thread.sleep(1000); // Espera un segundo antes de enviar los datos siguientes
             }
-        } catch(IOException ie){
-            cerrarTodo(sc, in, out);
         }
-    }
-
-    public void enviarMensaje(String mensaje){
-        try{
-                out.write(mensaje);
-                out.newLine();
-                out.flush();
-        } catch(IOException io){
-            io.printStackTrace();
-        }
-        
-    }
-    
-    public void cerrarTodo(Socket socket, BufferedReader in, BufferedWriter out){
-        try{
-            socket.close();
-            in.close();
-            out.close();
-        } catch(IOException io){
-            io.printStackTrace();
-        }
-        
     }
     
 }
