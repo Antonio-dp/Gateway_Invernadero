@@ -11,7 +11,6 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.DeliverCallback;
 import com.rabbitmq.client.Envelope;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,7 +21,7 @@ import java.util.logging.Logger;
  */
 public class Receiver {
 
-    private final static String QUEUE_NAME = "cola_entidad";
+    private final static String QUEUE_NAME = "cola_datos";
     static Gateway gw;
 
     public static void main(String[] argv) throws Exception {
