@@ -25,6 +25,7 @@ import javax.crypto.Cipher;
  * @author Vastem
  */
 public class Receiver {
+
     private static PrivateKey privateKey;
     private final static String QUEUE_NAME = "cola_datos";
     static Gateway gw;
@@ -54,9 +55,12 @@ public class Receiver {
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
                 try {
                     String decryptedData = decryptData(body);
-
-                    System.out.println("Mensaje recibido: " + decryptedData);
-                    send(decryptedData);
+                    
+                    if(decryptedData!=null){
+                        System.out.println("Mensaje recibido: " + decryptedData);
+                        send(decryptedData);
+                    }
+                    
                 } catch (Exception ex) {
                     //Logger.getLogger(Receiver.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -71,9 +75,13 @@ public class Receiver {
     }
 
     private static String decryptData(byte[] encryptedData) throws Exception {
-        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-        cipher.init(Cipher.DECRYPT_MODE, privateKey);
-        byte[] decryptedBytes = cipher.doFinal(encryptedData);
-        return new String(decryptedBytes);
+        try {
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            byte[] decryptedBytes = cipher.doFinal(encryptedData);
+            return new String(decryptedBytes);
+        }catch(Exception e){
+            return null;
+        }
     }
 }
